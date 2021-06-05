@@ -1,8 +1,8 @@
 <template>
   <div id="ertoc">
     <div class="errsub" @click="errPageShow = true">报错</div>
-    <div class="gohistory center" @click="goHome('History')">历史记录</div>
-    <div class="gohome center" @click="goHome('')">回主页</div>
+    <div class="gohistory center" @click="goHistory()">历史记录</div>
+    <div class="gohome center" @click="goHome()">回主页</div>
     <!-- 题目 -->
     <div class="topic">
       <div class="itemContent">
@@ -11,7 +11,7 @@
       <div class="map center">
         <img
           :src="optionss.topicData[nowPage - 1].img"
-          style="max-width: 80%; max-height: 30%"
+          style="max-width: 100%; max-height: 180px"
         />
       </div>
       <ul class="optionList">
@@ -73,8 +73,7 @@ import axios from "axios";
 import optionPage from "@/components/erroptionPage";
 export default {
   created() {
-    let nowData = JSON.parse(window.localStorage.getItem("historyData"));
-    this.optionss = nowData[this.$store.state.nowExamNum - 1];
+    this.optionss = this.editTopic();
     this.changeStyle();
   },
   data() {
@@ -98,6 +97,22 @@ export default {
     optionPage,
   },
   methods: {
+    editTopic() {
+      let nowData = JSON.parse(window.localStorage.getItem("historyData"));
+      let onTopicData = nowData[this.$route.query.num];
+      let allData = JSON.parse(window.localStorage.getItem("allData"));
+      let aAllData = allData.choice.concat(allData.judge);
+      let inTopicData = [];
+      for (let i = 0; i < onTopicData.topicId.length; i++) {
+        inTopicData.push(aAllData[onTopicData.topicId[i]-1]);
+      }
+      return {
+        topicData: inTopicData,
+        head: onTopicData.head,
+        answer: onTopicData.answer,
+      };
+    },
+    // 报错
     errSub() {
       if (this.errText.trim() == "") {
         this.errHint = "不能为空";
@@ -120,14 +135,26 @@ export default {
           if (res.data == "ok") {
             this.errText = "";
             this.errPageShow = false;
-          }else{
-            this.errHint="未知错误";
+          } else {
+            this.errHint = "未知错误";
           }
         });
     },
-    goHome(res) {
-      this.$router.push(`/${res}`);
+    // 回主页
+    goHome() {
+      this.$router.push("/");
     },
+    // 回历史记录
+    goHistory() {
+      this.$router.push({
+        path: "/History",
+        query: {
+          ss: 0,
+        },
+      });
+    },
+
+    // 正确与错误 颜色变换
     changeStyle() {
       this.yesNum = this.optionss.topicData[this.nowPage - 1].correct;
       this.errNum = this.optionss.answer[this.nowPage - 1];

@@ -1,8 +1,8 @@
 <template>
   <div id="history" :class="{ center: !historyShow }">
     <div class="hide" v-if="!historyShow">无历史记录</div>
-    <div class="gohome center" @click="goHome('')">回主页</div>
-    <div class="refpage center" @click="refPage()">刷新</div>
+    <div class="gohome center" @click="goHome('')" v-if="!refShow">回主页</div>
+    <div class="refpage center" @click="refPage()" v-if="refShow || !historyShow">刷新</div>
     <ul class="his-page" v-if="historyShow">
       <li v-for="index in nowData.length" :key="index">
         <div class="his-page-left">
@@ -12,7 +12,7 @@
             </div>
             <div>———</div>
             <div class="his-page-gradesum">
-              {{ nowData[nowData.length - index].topicData.length }}
+              {{ nowData[nowData.length - index].topicLength }}
             </div>
           </div>
           <div class="his-page-center">分</div>
@@ -33,34 +33,33 @@
   </div>
 </template>
 <script>
-export default {
+export default {  
   created() {
+    // 判断刷新按钮是否显示
+    this.$route.query.ss == 1 ? (this.refShow = true) : (this.refShow = false);
+    
+    // 判断
     let nowData = JSON.parse(window.localStorage.getItem("historyData"));
     if (nowData == null) {
       this.historyShow = false;
       this.refShow = false;
       return;
     }
-    if (nowData.length > 10) {
-      console.log("大于");
-      nowData.splice(0, nowData.length - 10);
-      window.localStorage.setItem("historyData", JSON.stringify(nowData));
-    }
-    // console.log(nowData);
+    
     this.nowData = nowData;
   },
   data() {
     return {
       nowData: [],
       historyShow: true,
-      refShow: true,
+      refShow: false,
     };
   },
   methods: {
     // 刷新获取历史纪录
     refPage() {
-      if(!this.historyShow){
-        return
+      if (!this.historyShow) {
+        return;
       }
       let nowData = JSON.parse(window.localStorage.getItem("historyData"));
       if (nowData.length > 10) {
@@ -72,8 +71,12 @@ export default {
       this.$router.push(`/${res}`);
     },
     goErr(index) {
-      this.$store.commit("editNowExamNum", index + 1);
-      this.$router.push("/Errtopic");
+      this.$router.push({
+        path: "/Errtopic",
+        query: {
+          num: index,
+        },
+      });
     },
   },
 };

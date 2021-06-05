@@ -9,7 +9,7 @@
       <div class="map center">
         <img
           :src="optionss[nowPage - 1].img"
-          style="max-width: 80%; max-height: 30%"
+          style="max-width: 100%; max-height: 180px"
         />
       </div>
       <ul class="optionList">
@@ -64,74 +64,18 @@ export default {
       this.head = "模拟考试";
     }
 
-    // 从本地提取题库，如果没有发起请求获取
-
-    // 判断本地有无
-
-    if (ms == "all") {
+    if (localStorage.getItem("allData") != null) {
+      this.allData = JSON.parse(window.localStorage.getItem("allData"));
       this.getAllData(ms);
     } else {
-      let topicData = JSON.parse(window.localStorage.getItem("topicData"));
-      let localaData;
-      let locaYes = false;
-      if (topicData != null) {
-        for (let i = 0; i < topicData.length; i++) {
-          if (topicData[i].head == this.head) {
-            localaData = topicData[i].topicData;
-            locaYes = true;
-          }
-        }
-
-        // 本地有，遍历提取
-        if (locaYes) {
-          for (let i = 0; i < localaData.length; i++) {
-            this.optionss.push(localaData[i]);
-            this.correct.push(this.optionss[i].correct);
-          }
-          this.ifShow = true;
-        } else {
-          // 本地没有，请求获取
-          axios
-            .get(`http://ks.kuold.com/gettopic?name=${ms}`)
-            .then(async (res) => {
-              let backData = res.data;
-
-              // 获取成功，打入下标存进本地
-              let topicNewData = {
-                head: this.head,
-                topicData: backData,
-              };
-              topicData.push(topicNewData);
-              window.localStorage.setItem(
-                "topicData",
-                JSON.stringify(topicData)
-              );
-              for (let i = 0; i < backData.length; i++) {
-                this.optionss.push(backData[i]);
-                this.correct.push(this.optionss[i].correct);
-              }
-              this.ifShow = true;
-            });
-        }
-      } else {
-        axios
-          .get(`http://ks.kuold.com/gettopic?name=${ms}`)
-          .then(async (res) => {
-            let backData = res.data;
-            topicData = [];
-            let topicNewData = {
-              head: this.head,
-              topicData: backData,
-            };
-            topicData.push(topicNewData);
-            window.localStorage.setItem("topicData", JSON.stringify(topicData));
-            for (let i = 0; i < backData.length; i++) {
-              this.optionss.push(backData[i]);
-              this.correct.push(this.optionss[i].correct);
-            }
-            this.ifShow = true;
-          });
-      }
+      axios.get(`http://ks.kuold.com/gettopic?name=all`).then(async (res) => {
+        this.allData = {
+          choice: JSON.parse(res.data.one),
+          judge: JSON.parse(res.data.two),
+        };
+        window.localStorage.setItem("allData", JSON.stringify(this.allData));
+        this.getAllData(ms);
+      });
     }
   },
   components: {
@@ -139,51 +83,49 @@ export default {
   },
 
   methods: {
-    getAllData(ms) {
-      try {
-        let allTopicData = JSON.parse(
-          window.localStorage.getItem("allTopicData")
-        );
-        for (let i = 0; i < 80; i++) {
-          let snum = Math.floor(Math.random() * allTopicData.choice.length + 1);
-          this.optionss.push(allTopicData.choice.splice(snum - 1, 1)[0]);
-          this.correct.push(this.optionss[i].correct);
-        }
-        for (let i = 0; i < 20; i++) {
-          let snum = Math.floor(Math.random() * allTopicData.judge.length + 1);
-          this.optionss.push(allTopicData.judge.splice(snum - 1, 1)[0]);
-          this.correct.push(this.optionss[i].correct);
-        }
-        this.ifShow = true;
-      } catch {
-        axios
-          .get(`http://ks.kuold.com/gettopic?name=${ms}`)
-          .then(async (res) => {
-            let allTopicData = {
-              choice: JSON.parse(res.data.one),
-              judge: JSON.parse(res.data.two),
-            };
-            window.localStorage.setItem(
-              "allTopicData",
-              JSON.stringify(allTopicData)
-            );
-            for (let i = 0; i < 80; i++) {
-              let snum = Math.floor(
-                Math.random() * allTopicData.choice.length + 1
-              );
-              this.optionss.push(allTopicData.choice.splice(snum - 1, 1)[0]);
-              this.correct.push(this.optionss[i].correct);
-            }
-            for (let i = 0; i < 20; i++) {
-              let snum = Math.floor(
-                Math.random() * allTopicData.judge.length + 1
-              );
-              this.optionss.push(allTopicData.judge.splice(snum - 1, 1)[0]);
-              this.correct.push(this.optionss[i].correct);
-            }
-            this.ifShow = true;
-          });
+    getTopicData(one, two, beginOne, beginTwo) {
+      let a = 0;
+      for (let i = beginOne; i < one; i++) {
+        this.optionss.push(this.allData.choice[i]);
+        this.correct.push(this.optionss[a].correct);
+        a++;
       }
+      for (let i = beginTwo; i < two; i++) {
+        this.optionss.push(this.allData.judge[i]);
+        this.correct.push(this.optionss[a].correct);
+        a++;
+      }
+    },
+    getAllTopicData() {
+      let a = 0;
+      for (let i = 0; i < 80; i++) {
+        let snum = Math.floor(Math.random() * this.allData.choice.length + 1);
+        this.optionss.push(this.allData.choice.splice(snum - 1, 1)[0]);
+        this.correct.push(this.optionss[a].correct);
+        a++;
+      }
+      for (let i = 0; i < 20; i++) {
+        let snum = Math.floor(Math.random() * this.allData.judge.length + 1);
+        this.optionss.push(this.allData.judge.splice(snum - 1, 1)[0]);
+        this.correct.push(this.optionss[a].correct);
+        a++;
+      }
+    },
+    getAllData(ms) {
+      if (ms == "one") {
+        this.getTopicData(53, 18, 0, 0);
+      } else if (ms == "two") {
+        this.getTopicData(252, 98, 53, 18);
+      } else if (ms == "three") {
+        this.getTopicData(382, 144, 252, 98);
+      } else if (ms == "four") {
+        this.getTopicData(517, 195, 382, 144);
+      } else if (ms == "five") {
+        this.getTopicData(710, 271, 517, 195);
+      } else {
+        this.getAllTopicData();
+      }
+      this.ifShow = true;
     },
 
     toChangePage(num) {
@@ -251,9 +193,9 @@ export default {
     submit() {
       let answer = this.answer;
       let correct = this.correct;
-      let grade = this.grade;
-      let i = 0;
-      for (i = 0; i < correct.length; i++) {
+      let grade = 0;
+      let topicId = [];
+      for (let i = 0; i < correct.length; i++) {
         if (answer[i] == correct[i]) {
           grade++;
         } else if (answer[i] == undefined) {
@@ -261,13 +203,17 @@ export default {
         }
       }
 
+      for (let i = 0; i < this.optionss.length; i++) {
+        topicId.push(this.optionss[i].id);
+      }
       this.correct = [];
 
       let onCom = {
         head: this.head,
-        topicData: this.optionss,
+        topicLength: this.optionss.length,
         answer: answer,
-        grade: grade
+        grade: grade,
+        topicId: topicId,
       };
       let oldData = JSON.parse(window.localStorage.getItem("historyData"));
       if (oldData != null) {
@@ -286,13 +232,13 @@ export default {
     return {
       head: "",
       ifShow: false,
-      grade: 0,
       nowPage: 1,
       pitchOn: 0,
       answer: [],
       correct: [],
       optionss: [],
       showOptionPage: false,
+      allData: {},
     };
   },
 };

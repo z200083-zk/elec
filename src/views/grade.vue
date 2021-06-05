@@ -3,24 +3,32 @@
     <h3 class="header center">考试成绩</h3>
     <div class="time"></div>
     <div class="gnum">
-      <div class="gnum-num center">{{grade}}</div>
+      <div class="gnum-num center">{{ grade }}</div>
       <div class="num-text center">分</div>
-      <div class="onerrtoc center" @click="goErrtopic()" style="cursor: pointer;">点击查看错题</div>
+      <div
+        class="onerrtoc center"
+        @click="goErrtopic()"
+        style="cursor: pointer"
+      >
+        点击查看错题
+      </div>
     </div>
     <div class="gohome center" @click="goHome()">回主页</div>
   </div>
 </template>
 <script>
 export default {
-  created(){
-    let nowGrade= JSON.parse(window.localStorage.getItem("historyData"));
-    this.grade = nowGrade[nowGrade.length-1].grade;
-    console.log(nowGrade[nowGrade.length-1].grade);
+  created() {
+    let nowGrade = JSON.parse(window.localStorage.getItem("historyData"));
+    this.grade = nowGrade[nowGrade.length - 1].grade;
+    this.hisId = nowGrade.length-1;
+    console.log(nowGrade[nowGrade.length - 1].grade);
     // console.log(nowGrade);
   },
   data() {
     return {
       grade: [],
+      hisId: "",
     };
   },
   methods: {
@@ -29,7 +37,12 @@ export default {
       this.$router.push("/");
     },
     goErrtopic() {
-      this.$router.push("/Errtopic");
+      this.$router.push({
+        path: "/Errtopic",
+        query: {
+          num: this.hisId,
+        },
+      });
     },
   },
 };

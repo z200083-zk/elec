@@ -1,6 +1,6 @@
 <template>
   <div class="intermediate">
-    <div class="gohistory center" @click="goHome('History')">历史记录</div>
+    <div class="gohistory center" @click="goHome()">历史记录</div>
     <div class="inte-box">
       <h3 class="top center">中级</h3>
       <div class="one center tic" @click="goStart('one')">{{ one }}</div>
@@ -18,58 +18,35 @@ import axios from "axios";
 export default {
   created() {
     try {
-      axios.get("http://ks.kuold.com/newTopic").then(async (res) => {
+      // 获取版本
+      axios.get("http://ks.kuold.com/versions").then(async (res) => {
+        let nowVersions = window.localStorage.getItem("versions");
         let nowTopicVs = window.localStorage.getItem("newTopic");
-        if (res.data == nowTopicVs) {
+        if (res.data.v == nowVersions) {
+          if (res.data.t == nowTopicVs) {
+            return;
+          } else {
+            window.localStorage.removeItem("allData");
+            window.localStorage.setItem("newTopic", res.data.t);
+          }
           return;
         } else {
-          window.localStorage.removeItem("topicData");
-          window.localStorage.removeItem("allTopicData");
-          window.localStorage.setItem("newTopic", res.data);
+          window.localStorage.clear();
+          window.localStorage.setItem("versions", res.data.v);
+          window.localStorage.setItem("newTopic", res.data.t);
         }
       });
     } catch {
-      axios.get("http://ks.kuold.com/newTopic").then(async (res) => {
-        window.localStorage.removeItem("topicData");
-        window.localStorage.removeItem("allTopicData");
-        window.localStorage.setItem("newTopic", res.data);
+      axios.get("http://ks.kuold.com/versions").then(async (res) => {
+        window.localStorage.clear();
+        window.localStorage.setItem("versions", res.data.v);
+        window.localStorage.setItem("newTopic", res.data.t);
       });
     }
   },
   methods: {
     goStart(ms) {
-      axios
-        .get(`http://ks.kuold.com/queryData?name=${ms}`)
-        .then(async (res) => {
-          this.goUp = res.data;
-          if (this.goUp == "模拟考试已完成") {
-            this.go(ms);
-          } else if (this.goUp == "第一单元已完成") {
-            this.go(ms);
-          } else if (this.goUp == "第二单元已完成") {
-            this.go(ms);
-          } else if (this.goUp == "第三单元已完成") {
-            this.go(ms);
-          } else if (this.goUp == "第四单元已完成") {
-            this.go(ms);
-          } else if (this.goUp == "第五单元已完成") {
-            this.go(ms);
-          } else {
-            if (this.goUp == "模拟考试未完成") {
-              this.all = "该题库尚未完成";
-            } else if (this.goUp == "第一单元未完成") {
-              this.one = "该题库尚未完成";
-            } else if (this.goUp == "第二单元未完成") {
-              this.two = "该题库尚未完成";
-            } else if (this.goUp == "第三单元未完成") {
-              this.three = "该题库尚未完成";
-            } else if (this.goUp == "第四单元未完成") {
-              this.four = "该题库尚未完成";
-            } else if (this.goUp == "第五单元未完成") {
-              this.five = "该题库尚未完成";
-            }
-          }
-        });
+      this.go(ms);
     },
     go(ms) {
       this.$router.push({
@@ -79,13 +56,17 @@ export default {
         },
       });
     },
-    goHome(res) {
-      this.$router.push(`/${res}`);
+    goHome() {
+      this.$router.push({
+        path: "/History",
+        query: {
+          ss: 0,
+        },
+      });
     },
   },
   data() {
     return {
-      goUp: 0,
       one: "第一单元",
       two: "第二单元",
       three: "第三单元",
