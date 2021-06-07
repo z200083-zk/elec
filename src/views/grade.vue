@@ -22,8 +22,6 @@ export default {
     let nowGrade = JSON.parse(window.localStorage.getItem("historyData"));
     this.grade = nowGrade[nowGrade.length - 1].grade;
     this.hisId = nowGrade.length-1;
-    console.log(nowGrade[nowGrade.length - 1].grade);
-    // console.log(nowGrade);
   },
   data() {
     return {

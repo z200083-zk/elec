@@ -17,9 +17,12 @@
 import axios from "axios";
 export default {
   created() {
-    try {
-      // 获取版本
+    // 获取版本
+    if (window.sessionStorage.getItem("1") == 111) {
+      return;
+    } else {
       axios.get("http://ks.kuold.com/versions").then(async (res) => {
+        window.sessionStorage.setItem("1", "111");
         let nowVersions = window.localStorage.getItem("versions");
         let nowTopicVs = window.localStorage.getItem("newTopic");
         if (res.data.v == nowVersions) {
@@ -35,12 +38,6 @@ export default {
           window.localStorage.setItem("versions", res.data.v);
           window.localStorage.setItem("newTopic", res.data.t);
         }
-      });
-    } catch {
-      axios.get("http://ks.kuold.com/versions").then(async (res) => {
-        window.localStorage.clear();
-        window.localStorage.setItem("versions", res.data.v);
-        window.localStorage.setItem("newTopic", res.data.t);
       });
     }
   },

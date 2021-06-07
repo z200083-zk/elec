@@ -25,8 +25,16 @@
     </div>
     <!-- 功能按钮 -->
     <div class="page">
-      <div class="pageUp page-btn" @click="onPageUp()">上一题</div>
-      <div class="pageDown page-btn" @click="onPageDown()">下一题</div>
+      <div class="pageUp page-btn" @click="changePage('up')" v-show="upShow">
+        上一题
+      </div>
+      <div
+        class="pageDown page-btn"
+        @click="changePage('down')"
+        v-show="downShow"
+      >
+        下一题
+      </div>
       <div class="pagenum center" @click="showOptionPage = true">
         {{ this.nowPage + "/" + correct.length }}
       </div>
@@ -64,9 +72,12 @@ export default {
       this.head = "模拟考试";
     }
 
+    this.startTime = this.getDate();
+
     if (localStorage.getItem("allData") != null) {
       this.allData = JSON.parse(window.localStorage.getItem("allData"));
       this.getAllData(ms);
+      this.changePage();
     } else {
       axios.get(`http://ks.kuold.com/gettopic?name=all`).then(async (res) => {
         this.allData = {
@@ -75,6 +86,7 @@ export default {
         };
         window.localStorage.setItem("allData", JSON.stringify(this.allData));
         this.getAllData(ms);
+        this.changePage();
       });
     }
   },
@@ -83,6 +95,25 @@ export default {
   },
 
   methods: {
+    // 获取开始 or 结束时间
+    getDate() {
+      let onDate = new Date();
+      let month = onDate.getMonth() + 1 + "月";
+      let date = onDate.getDate() + "日";
+      let hour =
+        onDate.getHours() < 10 ? "0" + onDate.getHours() : onDate.getHours();
+      let minutes =
+        onDate.getMinutes() < 10
+          ? "0" + onDate.getMinutes()
+          : onDate.getMinutes();
+      let seconds =
+        onDate.getSeconds() < 10
+          ? "0" + onDate.getSeconds()
+          : onDate.getSeconds();
+      let inDate = month + date + "\t" + hour + ":" + minutes + ":" + seconds;
+      return inDate;
+    },
+    // 切割第一 至 第五单元题目
     getTopicData(one, two, beginOne, beginTwo) {
       let a = 0;
       for (let i = beginOne; i < one; i++) {
@@ -96,6 +127,7 @@ export default {
         a++;
       }
     },
+    // 模考随机80+20道题
     getAllTopicData() {
       let a = 0;
       for (let i = 0; i < 80; i++) {
@@ -111,6 +143,7 @@ export default {
         a++;
       }
     },
+    // 判断单元 并 显示页面
     getAllData(ms) {
       if (ms == "one") {
         this.getTopicData(53, 18, 0, 0);
@@ -134,7 +167,19 @@ export default {
           this.answer.splice(i, 0, 0);
         }
       }
+
       this.nowPage = num;
+      if (this.nowPage == 1) {
+        this.upShow = false;
+        this.downShow = true;
+      } else if (this.nowPage == this.optionss.length) {
+        this.downShow = false;
+        this.upShow = true;
+      } else {
+        this.downShow = true;
+        this.upShow = true;
+      }
+
       if (this.answer[this.nowPage - 1] != 0) {
         this.pitchOn = this.answer[this.nowPage - 1];
       } else {
@@ -150,28 +195,10 @@ export default {
       this.pitchOn = index;
       this.answer.splice(this.nowPage - 1, 1, this.pitchOn);
     },
-    // 上一题
-    onPageUp() {
-      if (this.nowPage == 1) {
-        return;
-      }
 
-      this.changePage("up");
-    },
-    // 下一题
-    onPageDown() {
-      if (this.nowPage == this.optionss.length) {
-        return;
-      }
-
-      this.changePage("down");
-    },
-    // 换页存储
+    // 换页 存储答案
     changePage(on) {
-      if (this.pitchOn < 1) {
-        this.pitchOn = 0;
-      }
-      if (this.pitchOn == undefined) {
+      if (this.pitchOn < 1 || this.pitchOn == undefined) {
         this.pitchOn = 0;
       }
 
@@ -179,8 +206,18 @@ export default {
 
       if (on == "up") {
         this.nowPage -= 1;
+        this.downShow = true;
+
+        if (this.nowPage == 1) {
+          this.upShow = false;
+        }
       } else if (on == "down") {
         this.nowPage += 1;
+        this.upShow = true;
+
+        if (this.nowPage == this.optionss.length) {
+          this.downShow = false;
+        }
       }
 
       if (this.answer[this.nowPage - 1] != 0) {
@@ -207,13 +244,15 @@ export default {
         topicId.push(this.optionss[i].id);
       }
       this.correct = [];
-
+      this.endTime = this.getDate();
       let onCom = {
         head: this.head,
         topicLength: this.optionss.length,
         answer: answer,
         grade: grade,
         topicId: topicId,
+        startTime: this.startTime,
+        endTime: this.endTime,
       };
       let oldData = JSON.parse(window.localStorage.getItem("historyData"));
       if (oldData != null) {
@@ -239,6 +278,10 @@ export default {
       optionss: [],
       showOptionPage: false,
       allData: {},
+      upShow: false,
+      downShow: true,
+      startTime: 0,
+      endTime: 0,
     };
   },
 };
