@@ -23,6 +23,7 @@
         </li>
       </ul>
     </div>
+
     <!-- 功能按钮 -->
     <div class="page">
       <div class="pageUp page-btn" @click="changePage('up')" v-show="upShow">
@@ -40,6 +41,15 @@
       </div>
     </div>
     <div class="subcom" @click="submit()">提交</div>
+
+    <!-- 选择导航遮罩 -->
+    <div
+      class="option-shade"
+      @click="showDpage()"
+      v-show="showOptionPage == true"
+    ></div>
+
+    <!-- 选择导航 -->
     <optionPage
       v-show="showOptionPage"
       :pageNum="correct.length"
@@ -79,7 +89,7 @@ export default {
       this.getAllData(ms);
       this.changePage();
     } else {
-      axios.get(`http://mp.kuold.com/gettopic?name=all`).then(async (res) => {
+      axios.get(`https://ks.kuold.com/gettopic?name=all`).then(async (res) => {
         this.allData = {
           choice: JSON.parse(res.data.one),
           judge: JSON.parse(res.data.two),
@@ -161,7 +171,11 @@ export default {
       this.ifShow = true;
     },
 
+    // 选择导航触发
     toChangePage(num) {
+      // 遮罩隐藏
+      this.showDpage();
+
       for (let i = 0; i < num; i++) {
         if (this.answer[i] == undefined) {
           this.answer.splice(i, 0, 0);
@@ -186,7 +200,7 @@ export default {
         this.pitchOn = 0;
       }
     },
-    //   隐藏子组件
+    // 隐藏子组件
     showDpage() {
       this.showOptionPage = false;
     },
@@ -310,6 +324,14 @@ export default {
     position: absolute;
     left: 10px;
     top: 10px;
+  }
+  .option-shade {
+    width: 100%;
+    height: 100%;
+    background-color: #00000070;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
   .subcom {
     position: absolute;

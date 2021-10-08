@@ -2,7 +2,7 @@
   <div class="intermediate">
     <div class="gohistory center" @click="goHome()">历史记录</div>
     <div class="inte-box">
-      <h3 class="top center">中级</h3>
+      <h3 class="top center">{{ theme }}</h3>
       <div class="one center tic" @click="goStart('one')">{{ one }}</div>
       <div class="two center tic" @click="goStart('two')">{{ two }}</div>
       <div class="three center tic" @click="goStart('three')">{{ three }}</div>
@@ -19,9 +19,11 @@ export default {
   created() {
     // 获取版本
     if (window.sessionStorage.getItem("1") == 111) {
+      this.theme = window.localStorage.getItem("theme");
       return;
     } else {
-      axios.get("http://mp.kuold.com/versions").then(async (res) => {
+      axios.get("https://ks.kuold.com/versions").then(async (res) => {
+        console.log(res);
         window.sessionStorage.setItem("1", "111");
         let nowVersions = window.localStorage.getItem("versions");
         let nowTopicVs = window.localStorage.getItem("newTopic");
@@ -37,6 +39,8 @@ export default {
           window.localStorage.clear();
           window.localStorage.setItem("versions", res.data.v);
           window.localStorage.setItem("newTopic", res.data.t);
+          window.localStorage.setItem("theme", res.data.theme);
+          this.theme = res.data.theme;
         }
       });
     }
@@ -70,7 +74,8 @@ export default {
       three: "第三单元",
       four: "第四单元",
       five: "第五单元",
-      all: "模拟考试"
+      all: "模拟考试",
+      theme: "",
     };
   },
 };

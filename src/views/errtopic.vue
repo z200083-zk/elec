@@ -1,6 +1,6 @@
 <template>
   <div id="ertoc">
-    <div class="errsub" @click="errPageShow = true">报错</div>
+    <div class="errsub" @click="errPageShow = true">纠错</div>
     <div class="gohistory center" @click="goHistory()">历史记录</div>
     <div class="gohome center" @click="goHome()">回主页</div>
     <!-- 题目 -->
@@ -48,14 +48,22 @@
     <div class="err-page center" v-show="errPageShow">
       <div class="err-back" @click="errPageShow = false"></div>
       <div class="err-text" @click="errPageShow = true">
+        <p>本题id为{{optionss.topicData[nowPage - 1].id}}</p>
         <p>问题描述:</p>
         <input type="text" v-model="errText" />
         <div class="err-btm">
           <div class="err-btm-right">{{ errHint }}</div>
-          <div class="err-sub" @click="errSub()">报错</div>
+          <div class="err-sub" @click="errSub()">提交</div>
         </div>
       </div>
     </div>
+
+    <!-- 选择导航遮罩 -->
+    <div
+      class="option-shade"
+      @click="showDpage()"
+      v-show="showOptionPage == true"
+    ></div>
 
     <optionPage
       v-show="showOptionPage"
@@ -89,7 +97,7 @@ export default {
       judgeColor: "",
       errPageShow: false,
       errText: "",
-      errHint: "",
+      errHint: "提示：提交成功后会自动关闭",
     };
   },
 
@@ -104,7 +112,7 @@ export default {
       let aAllData = allData.choice.concat(allData.judge);
       let inTopicData = [];
       for (let i = 0; i < onTopicData.topicId.length; i++) {
-        inTopicData.push(aAllData[onTopicData.topicId[i]-1]);
+        inTopicData.push(aAllData[onTopicData.topicId[i] - 1]);
       }
       return {
         topicData: inTopicData,
@@ -115,7 +123,7 @@ export default {
     // 报错
     errSub() {
       if (this.errText.trim() == "") {
-        this.errHint = "不能为空";
+        this.errHint = "为空，未填写";
         return;
       } else {
         this.errHint = "";
@@ -126,14 +134,14 @@ export default {
         topicData: this.optionss.topicData[this.nowPage - 1],
       };
       axios
-        .post("http://mp.kuold.com/xrerr", errData, {
+        .post("https://ks.kuold.com/xrerr", errData, {
           headers: {
             "Content-Type": "application/json",
           },
         })
         .then(async (res) => {
           if (res.data == "ok") {
-            this.errText = "";
+            this.errText = "提示：提交成功后会自动关闭";
             this.errPageShow = false;
           } else {
             this.errHint = "未知错误";
@@ -190,7 +198,11 @@ export default {
         this.judgeColor = false;
       }
     },
+    // 选择导航触发
     toChangePage(num) {
+      // 遮罩隐藏
+      this.showDpage();
+
       this.nowPage = num;
       this.changeStyle();
     },
@@ -278,7 +290,7 @@ export default {
     .err-text {
       border-radius: 6px;
       width: 80%;
-      height: 120px;
+      height: 140px;
       background-color: #eee;
       box-sizing: border-box;
       padding: 10px;
@@ -381,6 +393,14 @@ export default {
       border-radius: 6px;
       cursor: pointer;
     }
+  }
+  .option-shade {
+    width: 100%;
+    height: 100%;
+    background-color: #00000070;
+    position: absolute;
+    top: 0;
+    left: 0;
   }
   .yes {
     color: yellowgreen !important;
