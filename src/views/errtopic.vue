@@ -126,7 +126,7 @@ export default {
         topicData: this.optionss.topicData[this.nowPage - 1],
       };
       axios
-        .post("http://ks.kuold.com/xrerr", errData, {
+        .post("http://mp.kuold.com/xrerr", errData, {
           headers: {
             "Content-Type": "application/json",
           },

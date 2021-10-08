@@ -79,7 +79,7 @@ export default {
       this.getAllData(ms);
       this.changePage();
     } else {
-      axios.get(`http://ks.kuold.com/gettopic?name=all`).then(async (res) => {
+      axios.get(`http://mp.kuold.com/gettopic?name=all`).then(async (res) => {
         this.allData = {
           choice: JSON.parse(res.data.one),
           judge: JSON.parse(res.data.two),

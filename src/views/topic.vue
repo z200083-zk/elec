@@ -42,7 +42,7 @@
 import axios from "axios";
 export default {
   // created() {
-  //   axios.get(`http://ks.kuold.com/srtopic`).then((res) => {
+  //   axios.get(`http://mp.kuold.com/srtopic`).then((res) => {
   //     console.log(res.data);
   //     let nowData = res.data;
   //     let newData = [];
@@ -70,7 +70,7 @@ export default {
     submitData() {
       let subData = JSON.stringify(this.nowData);
       //   console.log(subData);
-      axios.post("http://ks.kuold.com/xrtopic", subData, {
+      axios.post("http://mp.kuold.com/xrtopic", subData, {
         headers: {
           "Content-Type": "application/json",
         },
@@ -90,7 +90,7 @@ export default {
     // 获取
     getJson() {
       let name = "sj.json";
-      axios.get(`http://ks.kuold.com/srtopic?cat=${name}`).then((res) => {
+      axios.get(`http://mp.kuold.com/srtopic?cat=${name}`).then((res) => {
         this.backData = res.data;
         this.nowData = res.data;
       });

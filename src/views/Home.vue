@@ -21,7 +21,7 @@ export default {
     if (window.sessionStorage.getItem("1") == 111) {
       return;
     } else {
-      axios.get("http://ks.kuold.com/versions").then(async (res) => {
+      axios.get("http://mp.kuold.com/versions").then(async (res) => {
         window.sessionStorage.setItem("1", "111");
         let nowVersions = window.localStorage.getItem("versions");
         let nowTopicVs = window.localStorage.getItem("newTopic");
@@ -41,6 +41,7 @@ export default {
       });
     }
   },
+
   methods: {
     goStart(ms) {
       this.go(ms);
@@ -69,7 +70,7 @@ export default {
       three: "第三单元",
       four: "第四单元",
       five: "第五单元",
-      all: "模拟考试",
+      all: "模拟考试"
     };
   },
 };
